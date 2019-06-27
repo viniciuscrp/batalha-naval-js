@@ -1,0 +1,90 @@
+body {
+    margin: 60px auto;
+    width: 100%;
+    height: 100%;
+    background-color: #d3d3d3;
+}
+
+#tabuleiro {
+    float: left;
+}
+
+#tabuleiro2 {
+    float: right;
+}
+
+#tabuleiro, #tabuleiro2 {
+    margin: 50px;
+}
+
+.navios {
+    width: 285px;
+    padding: 15px;
+    border: 1px solid black;
+    display: flex;
+    justify-content: space-around;
+    position: relative;
+    top: 150px;
+    background-color: #0077be;
+}
+
+.submarino, .contratorpedeiro, .porta-avioes {
+    height: auto;
+}
+
+.esq {
+    float: left;
+}
+
+.dir {
+    float: right;
+}
+
+.esq, .dir {
+    position: relative;
+}
+
+#tabuleiro, #tabuleiro2 {
+	position:relative;
+	width:500px;
+	height:500px;
+}
+
+.text-navios {
+    display: block
+}
+
+#tabuleiro div, #tabuleiro2 div {
+	position:absolute;
+	box-sizing: border-box;
+	border: 1px solid #ddd;
+	width:50px;
+	height:50px;
+}
+
+.divisor {
+    height: 65%;
+    position: absolute;
+    left: 50%;
+    border-left: 1px solid black;
+}
+
+.quadrado {
+    height: 50px;
+    width: 50px;
+    box-sizing: border-box;
+    border: 1px solid white;
+    background-color: black;
+}
+
+.vazia {
+    background-color: #0077be;
+}
+
+.segurar {
+    border: solid 1px white;
+}
+
+.transparente {
+    display: none;
+}
