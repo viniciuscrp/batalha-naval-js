@@ -82,9 +82,22 @@ body {
 }
 
 .segurar {
-    border: solid 1px white;
+    background-color: transparent;
 }
 
 .transparente {
     display: none;
+}
+
+.sobreposto {
+    background: #f4f4f4;
+    border-style: dashed;
+}
+
+.celula-invalida {
+    background-color: red;
+}
+
+.preenchida {
+    background-color: #ffff00;
 }

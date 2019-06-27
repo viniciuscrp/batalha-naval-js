@@ -1,3 +1,14 @@
+//#region Variáveis
+let contaAcertos;
+let jogoIniciado = false;
+let matriz = [];
+let embarcacao;
+let elemID;
+let arrID = [];
+let celulaPreenchida;
+let acertosJogador1 = 0;
+let acertosJogador2 = 0;
+let jogoIniciado = false;
 const linhas = 10;
 const colunas = 10;
 const areaQuadrado = 50;
@@ -5,14 +16,6 @@ const navioTanque = 5;
 const portaAvioes = 4;
 const contraTorpedeiro = 3;
 const submarino = 2;
-let contaAcertos;
-let jogoIniciado = false;
-let matriz = [];
-
-const tabuleiro = document.getElementById('tabuleiro');
-const tabuleiro2 = document.getElementById('tabuleiro2');
-
-// variáveis que contém as divs que constituem cada embarcação da frota
 const navioTanqueEsq = document.getElementById('navioTanqueEsq');
 const navioTanqueDir = document.getElementById('navioTanqueDir');
 const contraTorpedeiroEsq1 = document.getElementById('contraTorpedeiroEsq1');
@@ -23,16 +26,22 @@ const portaAvioesEsq = document.getElementById('portaAvioesEsq');
 const portaAvioesDir = document.getElementById('portaAvioesDir');
 const submarinoEsq = document.getElementById('submarinoEsq');
 const submarinoDir = document.getElementById('submarinoDir');
-
 const frotaEsquerda = document.getElementById('frota-esquerda');
 const frotaDireita = document.getElementById('frota-direita');
+const tabuleiro = document.getElementById('tabuleiro');
+const tabuleiro2 = document.getElementById('tabuleiro2');
+//#endregion
 
-// constrói o tabuleiro da esquerda
+//#region Construção dos tabuleiros
 for (i = 0; i < colunas; i++) {
 	for (j = 0; j < linhas; j++) {
 		let quadrado = document.createElement('div');
-        tabuleiro.appendChild(quadrado);
-		quadrado.id = 'tab-esq' + j + i;		
+		tabuleiro.appendChild(quadrado);
+		if (j === 0) {
+			quadrado.id = 'tab-esq-' + i;	
+		} else {
+			quadrado.id = 'tab-esq-' + j + i;	
+		}			
 		let posicaoTopo = j * areaQuadrado;
 		let posicaoEsquerda = i * areaQuadrado;	
 		quadrado.style.top = posicaoTopo + 'px';
@@ -41,12 +50,15 @@ for (i = 0; i < colunas; i++) {
 	}
 }
 
-// constrói o tabuleiro da direita
 for (i = 0; i < colunas; i++) {
 	for (j = 0; j < linhas; j++) {
 		let quadrado = document.createElement('div');
 		tabuleiro2.appendChild(quadrado);
-		quadrado.id = 'tab-dir' + j + i;			
+		if (j === 0) {
+			quadrado.id = 'tab-dir-' + i;	
+		} else {
+			quadrado.id = 'tab-dir-' + j + i;	
+		}	
 		let posicaoTopo = j * areaQuadrado;
 		let posicaoEsquerda = i * areaQuadrado;			
 		quadrado.style.top = posicaoTopo + 'px';
@@ -54,15 +66,9 @@ for (i = 0; i < colunas; i++) {
 		quadrado.className = 'celula vazia'		
 	}
 }
+//#endregion
 
-
-/*
-* Laços abaixo constroem as embarcações
-* navio-tanque -> 5 casas
-* porta-aviões -> 4 casas
-* contra-torpedeiro -> 3 casas
-* submarino -> 2 casas
-*/
+//#region Construção das embarcações
 for (i = 0; i < navioTanque; i++) {
 	let quadradoEsq = document.createElement('div');
 	let quadradoDir = document.createElement('div');
@@ -134,9 +140,19 @@ for (i = 0; i < submarino; i++) {
 	quadradoDir.style.top = i * areaQuadrado + 'px';
 	quadradoDir.style.cursor = 'pointer';
 }
+//#endregion
 
+//#region Atribui os eventos às células
 const celulas = document.querySelectorAll('.celula');
+for (const celula of celulas) {
+	celula.addEventListener('dragover', dragOver);
+	celula.addEventListener('dragenter', dragEnter);
+	celula.addEventListener('dragleave', dragLeave);
+	celula.addEventListener('drop', dragDrop);
+}
+//#endregion
 
+//#region Atribui os eventos as embarcações
 navioTanqueEsq.addEventListener('dragstart', dragStart);
 navioTanqueDir.addEventListener('dragstart', dragStart);
 contraTorpedeiroEsq1.addEventListener('dragstart', dragStart);
@@ -147,7 +163,6 @@ portaAvioesEsq.addEventListener('dragstart', dragStart);
 portaAvioesDir.addEventListener('dragstart', dragStart);
 submarinoEsq.addEventListener('dragstart', dragStart);
 submarinoDir.addEventListener('dragstart', dragStart);
-
 navioTanqueEsq.addEventListener('dragend', dragEnd);
 navioTanqueDir.addEventListener('dragend', dragEnd);
 contraTorpedeiroEsq1.addEventListener('dragend', dragEnd);
@@ -158,12 +173,334 @@ portaAvioesEsq.addEventListener('dragend', dragEnd);
 portaAvioesDir.addEventListener('dragend', dragEnd);
 submarinoEsq.addEventListener('dragend', dragEnd);
 submarinoDir.addEventListener('dragend', dragEnd);
+//#endregion
 
+//#region Auditores dos eventos
 function dragStart() {
+	this.className += ' segurar';
 	setTimeout(() => (this.className += ' transparente'), 0);
-	console.log("dragStart")
+	embarcacao = this;
 }
 
 function dragEnd() {
-	setTimeout(() => (this.classList.remove('transparente'), 0));
+	setTimeout(() => (this.classList.remove('segurar'), 0));
 }
+
+function dragOver(e) {
+	e.preventDefault();
+}
+
+function dragEnter(e) {
+	celulaPreenchida = this;
+	e.preventDefault();
+	this.className += ' sobreposto';
+	elemID = this.id;
+	arrID = elemID.split('-');
+	switch (embarcacao.id) {
+		case 'navioTanqueEsq':
+			if (arrID[2] > 59) {
+				this.classList.remove('sobreposto');
+				this.className += ' celula-invalida';
+			} else if (arrID[1] == 'dir') {
+				this.classList.remove('sobreposto');
+				this.className += ' celula-invalida';
+			}
+			break;
+
+		case 'navioTanqueDir':
+			if (arrID[2] > 59) {
+				this.classList.remove('sobreposto');
+				this.className += ' celula-invalida';
+			} else if (arrID[1] == 'esq') {
+				this.classList.remove('sobreposto');
+				this.className += ' celula-invalida';
+			}
+			break;
+	
+		case 'portaAvioesEsq':
+			if (arrID[2] > 69) {
+				this.classList.remove('sobreposto');
+				this.className += ' celula-invalida';
+			} else if (arrID[1] == 'dir') {
+				this.classList.remove('sobreposto');
+				this.className += ' celula-invalida';
+			}
+			break;
+	
+		case 'portaAvioesDir':
+			if (arrID[2] > 69) {
+				this.classList.remove('sobreposto');
+				this.className += ' celula-invalida';
+			} else if (arrID[1] == 'esq') {
+				this.classList.remove('sobreposto');
+				this.className += ' celula-invalida';
+			}
+			break;
+
+		case 'contraTorpedeiroEsq1':
+			if (arrID[2] > 79) {
+				this.classList.remove('sobreposto');
+				this.className += ' celula-invalida';
+			} else if (arrID[1] == 'dir') {
+				this.classList.remove('sobreposto');
+				this.className += ' celula-invalida';
+			}
+			break;
+
+		case 'contraTorpedeiroEsq2':
+			if (arrID[2] > 79) {
+				this.classList.remove('sobreposto');
+				this.className += ' celula-invalida';
+			} else if (arrID[1] == 'dir') {
+				this.classList.remove('sobreposto');
+				this.className += ' celula-invalida';
+			}
+			break;
+
+		case 'contraTorpedeiroDir1':
+			if (arrID[2] > 79) {
+				this.classList.remove('sobreposto');
+				this.className += ' celula-invalida';
+			} else if (arrID[1] == 'esq') {
+				this.classList.remove('sobreposto');
+				this.className += ' celula-invalida';
+			}
+			break;
+
+		case 'contraTorpedeiroDir2':
+			if (arrID[2] > 79) {
+				this.classList.remove('sobreposto');
+				this.className += ' celula-invalida';
+			} else if (arrID[1] == 'esq') {
+				this.classList.remove('sobreposto');
+				this.className += ' celula-invalida';
+			}
+			break;
+
+		case 'submarinoEsq':
+			if (arrID[2] > 89) {
+				this.classList.remove('sobreposto');
+				this.className += ' celula-invalida';
+			} else if (arrID[1] == 'dir') {
+				this.classList.remove('sobreposto');
+				this.className += ' celula-invalida';
+			}
+			break;
+
+		case 'submarinoDir':
+			if (arrID[2] > 89) {
+				this.classList.remove('sobreposto');
+				this.className += ' celula-invalida';
+			} else if (arrID[1] == 'esq') {
+				this.classList.remove('sobreposto');
+				this.className += ' celula-invalida';
+			}
+			break;
+
+		default:
+			break;
+	}
+}
+
+function dragLeave(e) {
+	e.preventDefault();
+	this.classList.remove('sobreposto');
+	if (this.classList.contains('celula-invalida')) {
+		this.classList.remove('celula-invalida');
+	}
+}
+
+function dragDrop(e) {
+	let valor;
+	e.preventDefault();
+	this.classList.remove('sobreposto');
+	if (this.classList.contains('celula-invalida')) {
+		this.classList.remove('celula-invalida');
+	}
+	switch (embarcacao.id) {
+		case 'navioTanqueEsq':
+			if (arrID[2] > 59) {
+				this.classList.remove('celula-invalida');
+				embarcacao.classList.remove('transparente');
+			} else if (arrID[1] == 'dir') {
+				this.classList.remove('celula-invalida');
+				embarcacao.classList.remove('transparente');
+			} else {
+				let i = arrID[2];
+				valor = i === undefined ? 0 : parseInt(arrID[2]);
+				for (i = valor; i < valor +  10 * navioTanque; i = i + 10) {
+					celulaPreenchida = document.getElementById(`tab-esq-${i}`);
+					celulaPreenchida.className += ' preenchida';
+				}
+				embarcacao.className += ' transparente'
+			}
+			break;
+
+		case 'navioTanqueDir':
+			if (arrID[2] > 59) {
+				this.classList.remove('celula-invalida');
+				embarcacao.classList.remove('transparente');
+			} else if (arrID[1] == 'esq') {
+				this.classList.remove('celula-invalida');
+				embarcacao.classList.remove('transparente');
+			} else {
+				let i = arrID[2];
+				valor = i === undefined ? 0 : parseInt(arrID[2]);
+				for (i = valor; i < valor +  10 * navioTanque; i = i + 10) {
+					celulaPreenchida = document.getElementById(`tab-dir-${i}`);
+					celulaPreenchida.className += ' preenchida';
+				}
+				embarcacao.className += ' transparente'
+			}
+			break;
+
+		case 'portaAvioesEsq':
+			if (arrID[2] > 69) {
+				this.classList.remove('celula-invalida');
+				embarcacao.classList.remove('transparente');
+			} else if (arrID[1] == 'dir') {
+				this.classList.remove('celula-invalida');
+				embarcacao.classList.remove('transparente');
+			} else {
+				let i = arrID[2];
+				valor = i === undefined ? 0 : parseInt(arrID[2]);
+				for (i = valor; i < valor +  10 * portaAvioes; i = i + 10) {
+					celulaPreenchida = document.getElementById(`tab-esq-${i}`);
+					celulaPreenchida.className += ' preenchida';
+				}
+				embarcacao.className += ' transparente'
+			}
+			break;
+
+		case 'portaAvioesDir':
+			if (arrID[2] > 69) {
+				this.classList.remove('celula-invalida');
+				embarcacao.classList.remove('transparente');
+			} else if (arrID[1] == 'esq') {
+				this.classList.remove('celula-invalida');
+				embarcacao.classList.remove('transparente');
+			} else {
+				let i = arrID[2];
+				valor = i === undefined ? 0 : parseInt(arrID[2]);
+				for (i = valor; i < valor +  10 * portaAvioes; i = i + 10) {
+					celulaPreenchida = document.getElementById(`tab-dir-${i}`);
+					celulaPreenchida.className += ' preenchida';
+				}
+				embarcacao.className += ' transparente'
+			}
+			break;
+
+		case 'contraTorpedeiroEsq1':
+			if (arrID[2] > 79) {
+				this.classList.remove('celula-invalida');
+				embarcacao.classList.remove('transparente');
+			} else if (arrID[1] == 'dir') {
+				this.classList.remove('celula-invalida');
+				embarcacao.classList.remove('transparente');
+			} else {
+				let i = arrID[2];
+				valor = i === undefined ? 0 : parseInt(arrID[2]);
+				for (i = valor; i < valor +  10 * contraTorpedeiro; i = i + 10) {
+					celulaPreenchida = document.getElementById(`tab-esq-${i}`);
+					celulaPreenchida.className += ' preenchida';
+				}
+				embarcacao.className += ' transparente'
+			}
+			break;
+
+		case 'contraTorpedeiroEsq2':
+			if (arrID[2] > 79) {
+				this.classList.remove('celula-invalida');
+				embarcacao.classList.remove('transparente');
+			} else if (arrID[1] == 'dir') {
+				this.classList.remove('celula-invalida');
+				embarcacao.classList.remove('transparente');
+			} else {
+				let i = arrID[2];
+				valor = i === undefined ? 0 : parseInt(arrID[2]);
+				for (i = valor; i < valor +  10 * contraTorpedeiro; i = i + 10) {
+					celulaPreenchida = document.getElementById(`tab-esq-${i}`);
+					celulaPreenchida.className += ' preenchida';
+				}
+				embarcacao.className += ' transparente'
+			}
+			break;
+
+		case 'contraTorpedeiroDir1':
+			if (arrID[2] > 79) {
+				this.classList.remove('celula-invalida');
+				embarcacao.classList.remove('transparente');
+			} else if (arrID[1] == 'esq') {
+				this.classList.remove('celula-invalida');
+				embarcacao.classList.remove('transparente');
+			} else {
+				let i = arrID[2];
+				valor = i === undefined ? 0 : parseInt(arrID[2]);
+				for (i = valor; i < valor +  10 * contraTorpedeiro; i = i + 10) {
+					celulaPreenchida = document.getElementById(`tab-dir-${i}`);
+					celulaPreenchida.className += ' preenchida';
+				}
+				embarcacao.className += ' transparente'
+			}
+			break;
+
+		case 'contraTorpedeiroDir2':
+			if (arrID[2] > 79) {
+				this.classList.remove('celula-invalida');
+				embarcacao.classList.remove('transparente');
+			} else if (arrID[1] == 'esq') {
+				this.classList.remove('celula-invalida');
+				embarcacao.classList.remove('transparente');
+			} else {
+				let i = arrID[2];
+				valor = i === undefined ? 0 : parseInt(arrID[2]);
+				for (i = valor; i < valor +  10 * contraTorpedeiro; i = i + 10) {
+					celulaPreenchida = document.getElementById(`tab-dir-${i}`);
+					celulaPreenchida.className += ' preenchida';
+				}
+				embarcacao.className += ' transparente'
+			}
+			break;
+
+		case 'submarinoEsq':
+			if (arrID[2] > 89) {
+				this.classList.remove('celula-invalida');
+				embarcacao.classList.remove('transparente');
+			} else if (arrID[1] == 'dir') {
+				this.classList.remove('celula-invalida');
+				embarcacao.classList.remove('transparente');
+			} else {
+				let i = arrID[2];
+				valor = i === undefined ? 0 : parseInt(arrID[2]);
+				for (i = valor; i < valor +  10 * submarino; i = i + 10) {
+					celulaPreenchida = document.getElementById(`tab-esq-${i}`);
+					celulaPreenchida.className += ' preenchida';
+				}
+				embarcacao.className += ' transparente'
+			}
+			break;
+
+		case 'submarinoDir':
+			if (arrID[2] > 79) {
+				this.classList.remove('celula-invalida');
+				embarcacao.classList.remove('transparente');
+			} else if (arrID[1] == 'esq') {
+				this.classList.remove('celula-invalida');
+				embarcacao.classList.remove('transparente');
+			} else {
+				let i = arrID[2];
+				valor = i === undefined ? 0 : parseInt(arrID[2]);
+				for (i = valor; i < valor +  10 * submarino; i = i + 10) {
+					celulaPreenchida = document.getElementById(`tab-dir-${i}`);
+					celulaPreenchida.className += ' preenchida';
+				}
+				embarcacao.className += ' transparente'
+			}
+			break;
+			
+		default:
+			break;
+	}
+}
+//#endregion
+
