@@ -101,3 +101,11 @@ body {
 .preenchida {
     background-color: #ffff00;
 }
+
+.tiro-agua {
+    background-color: #ccc;
+}
+
+.tiro-certeiro {
+    background-color: red;
+}
