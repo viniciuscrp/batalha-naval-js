@@ -51,6 +51,7 @@ for (i = 0; i < colunas; i++) {
 		quadrado.style.top = posicaoTopo + 'px';
 		quadrado.style.left = posicaoEsquerda + 'px';	
 		quadrado.className = 'celula vazia';	
+		quadrado.draggable = false;
 		quadrado.addEventListener('click', dispararTorpedo);					
 	}
 }
@@ -68,7 +69,8 @@ for (i = 0; i < colunas; i++) {
 		let posicaoEsquerda = i * areaQuadrado;			
 		quadrado.style.top = posicaoTopo + 'px';
 		quadrado.style.left = posicaoEsquerda + 'px';
-		quadrado.className = 'celula vazia'	;	
+		quadrado.className = 'celula vazia'	;
+		quadrado.draggable = false;	
 		quadrado.addEventListener('click', dispararTorpedo);	
 	}
 }
@@ -198,6 +200,7 @@ function dragOver(e) {
 }
 
 function dragEnter(e) {
+	if (embarcacao === undefined) return;
 	celulaPreenchida = this;
 	e.preventDefault();
 	this.className += ' sobreposto';
@@ -351,6 +354,7 @@ function dragDrop(e) {
 	let valor;
 	e.preventDefault();
 	if (e.target.classList.contains('preenchida')) return;
+	if (embarcacao === undefined) return;
 	this.classList.remove('sobreposto');
 	if (this.classList.contains('celula-invalida')) {
 		this.classList.remove('celula-invalida');
@@ -635,6 +639,7 @@ function dragDrop(e) {
 	if (embarcacoesDirPosicionadas()) {
 		frotaDireita.style.display = 'none';
 	}
+	embarcacao = undefined;
 }
 //#endregion
 
