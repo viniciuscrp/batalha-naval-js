@@ -28,6 +28,16 @@ body {
     background-color: #0077be;
 }
 
+.mensagem {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 32px;
+    font-family: Arial, Helvetica, sans-serif;
+    color: green;
+}
+
 .submarino, .contratorpedeiro, .porta-avioes {
     height: auto;
 }
@@ -62,13 +72,6 @@ body {
 	height:50px;
 }
 
-.divisor {
-    height: 65%;
-    position: absolute;
-    left: 50%;
-    border-left: 1px solid black;
-}
-
 .quadrado {
     height: 50px;
     width: 50px;
@@ -90,7 +93,7 @@ body {
 }
 
 .sobreposto {
-    background: #f4f4f4;
+    background-color: #f4f4f4;
     border-style: dashed;
 }
 
@@ -99,5 +102,20 @@ body {
 }
 
 .preenchida {
-    background-color: #ffff00;
+    background-color: #000;
+}
+
+.btn {
+    height: 50px;
+    width: auto;
+    font-size: 20px;
+    border-radius: 5px;
+}
+
+.atingiu-agua {
+    background-color: #f4f4f4 !important;
+}
+
+.atingiu-embarcacao {
+    background-color: red !important;
 }

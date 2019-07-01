@@ -6,9 +6,12 @@ let embarcacao;
 let elemID;
 let arrID = [];
 let celulaPreenchida;
-let acertosJogador1 = 0;
-let acertosJogador2 = 0;
-let jogoIniciado = false;
+let acertosJogadorEsquerda = 0;
+let acertosJogadorDireita = 0;
+let jogadorEsquerdaPronto = false;
+let jogadorDireitaPronto = false;
+let turnoJogadorEsquerda = false;
+let turnoJogadorDireita = false;
 const linhas = 10;
 const colunas = 10;
 const areaQuadrado = 50;
@@ -30,6 +33,7 @@ const frotaEsquerda = document.getElementById('frota-esquerda');
 const frotaDireita = document.getElementById('frota-direita');
 const tabuleiro = document.getElementById('tabuleiro');
 const tabuleiro2 = document.getElementById('tabuleiro2');
+const textoAjuda = document.getElementById('texto-ajuda');
 //#endregion
 
 //#region Construção dos tabuleiros
@@ -46,7 +50,8 @@ for (i = 0; i < colunas; i++) {
 		let posicaoEsquerda = i * areaQuadrado;	
 		quadrado.style.top = posicaoTopo + 'px';
 		quadrado.style.left = posicaoEsquerda + 'px';	
-		quadrado.className = 'celula vazia';						
+		quadrado.className = 'celula vazia';	
+		quadrado.addEventListener('click', dispararTorpedo);					
 	}
 }
 
@@ -63,7 +68,8 @@ for (i = 0; i < colunas; i++) {
 		let posicaoEsquerda = i * areaQuadrado;			
 		quadrado.style.top = posicaoTopo + 'px';
 		quadrado.style.left = posicaoEsquerda + 'px';
-		quadrado.className = 'celula vazia'		
+		quadrado.className = 'celula vazia'	;	
+		quadrado.addEventListener('click', dispararTorpedo);	
 	}
 }
 //#endregion
@@ -204,6 +210,8 @@ function dragEnter(e) {
 			} else if (arrID[1] == 'dir') {
 				this.classList.remove('sobreposto');
 				this.className += ' celula-invalida';
+			} else {
+				setTimeout(() => (marcarSobreposto(parseInt(arrID[2]), navioTanque), 0));
 			}
 			break;
 
@@ -214,6 +222,8 @@ function dragEnter(e) {
 			} else if (arrID[1] == 'esq') {
 				this.classList.remove('sobreposto');
 				this.className += ' celula-invalida';
+			} else {
+				setTimeout(() => (marcarSobreposto(parseInt(arrID[2]), navioTanque), 0));
 			}
 			break;
 	
@@ -224,6 +234,8 @@ function dragEnter(e) {
 			} else if (arrID[1] == 'dir') {
 				this.classList.remove('sobreposto');
 				this.className += ' celula-invalida';
+			} else {
+				setTimeout(() => (marcarSobreposto(parseInt(arrID[2]), portaAvioes), 0));
 			}
 			break;
 	
@@ -234,6 +246,8 @@ function dragEnter(e) {
 			} else if (arrID[1] == 'esq') {
 				this.classList.remove('sobreposto');
 				this.className += ' celula-invalida';
+			} else {
+				setTimeout(() => (marcarSobreposto(parseInt(arrID[2]), portaAvioes), 0));
 			}
 			break;
 
@@ -244,6 +258,8 @@ function dragEnter(e) {
 			} else if (arrID[1] == 'dir') {
 				this.classList.remove('sobreposto');
 				this.className += ' celula-invalida';
+			} else {
+				setTimeout(() => (marcarSobreposto(parseInt(arrID[2]), contraTorpedeiro), 0));
 			}
 			break;
 
@@ -254,6 +270,8 @@ function dragEnter(e) {
 			} else if (arrID[1] == 'dir') {
 				this.classList.remove('sobreposto');
 				this.className += ' celula-invalida';
+			} else {
+				setTimeout(() => (marcarSobreposto(parseInt(arrID[2]), contraTorpedeiro), 0));
 			}
 			break;
 
@@ -264,6 +282,8 @@ function dragEnter(e) {
 			} else if (arrID[1] == 'esq') {
 				this.classList.remove('sobreposto');
 				this.className += ' celula-invalida';
+			} else {
+				setTimeout(() => (marcarSobreposto(parseInt(arrID[2]), contraTorpedeiro), 0));
 			}
 			break;
 
@@ -274,6 +294,8 @@ function dragEnter(e) {
 			} else if (arrID[1] == 'esq') {
 				this.classList.remove('sobreposto');
 				this.className += ' celula-invalida';
+			} else {
+				setTimeout(() => (marcarSobreposto(parseInt(arrID[2]), contraTorpedeiro), 0));
 			}
 			break;
 
@@ -284,6 +306,8 @@ function dragEnter(e) {
 			} else if (arrID[1] == 'dir') {
 				this.classList.remove('sobreposto');
 				this.className += ' celula-invalida';
+			} else {
+				setTimeout(() => (marcarSobreposto(parseInt(arrID[2]), submarino), 0));
 			}
 			break;
 
@@ -294,6 +318,8 @@ function dragEnter(e) {
 			} else if (arrID[1] == 'esq') {
 				this.classList.remove('sobreposto');
 				this.className += ' celula-invalida';
+			} else {
+				setTimeout(() => (marcarSobreposto(parseInt(arrID[2]), submarino), 0));
 			}
 			break;
 
@@ -304,9 +330,19 @@ function dragEnter(e) {
 
 function dragLeave(e) {
 	e.preventDefault();
-	this.classList.remove('sobreposto');
-	if (this.classList.contains('celula-invalida')) {
-		this.classList.remove('celula-invalida');
+	let celulaAnterior = e.srcElement;
+	if (celulaAnterior.classList.contains('celula-invalida')) {
+		celulaAnterior.classList.remove('celula-invalida');
+	}
+	let celulaAnteriorArrayID = celulaAnterior.id.split('-');
+	if (embarcacao.classList.contains('navio-tanque')) {
+		removerSobreposto(parseInt(celulaAnteriorArrayID[2]), celulaAnteriorArrayID[1], navioTanque);
+	} else if (embarcacao.classList.contains('porta-avioes')) {
+		removerSobreposto(parseInt(celulaAnteriorArrayID[2]), celulaAnteriorArrayID[1], portaAvioes);
+	} else if (embarcacao.classList.contains('contratorpedeiro')) {
+		removerSobreposto(parseInt(celulaAnteriorArrayID[2]), celulaAnteriorArrayID[1], contraTorpedeiro);
+	} else {
+		removerSobreposto(parseInt(celulaAnteriorArrayID[2]), celulaAnteriorArrayID[1], submarino);
 	}
 }
 
@@ -326,13 +362,22 @@ function dragDrop(e) {
 				this.classList.remove('celula-invalida');
 				embarcacao.classList.remove('transparente');
 			} else {
-				let i = arrID[2];
-				valor = i === undefined ? 0 : parseInt(arrID[2]);
-				for (i = valor; i < valor +  10 * navioTanque; i = i + 10) {
-					celulaPreenchida = document.getElementById(`tab-esq-${i}`);
-					celulaPreenchida.className += ' preenchida';
+				if (podePosicionar(e.target, navioTanque)) {
+					let i = arrID[2];
+					valor = i === undefined ? 0 : parseInt(arrID[2]);
+					for (i = valor; i < valor +  10 * navioTanque; i = i + 10) {
+						celulaPreenchida = document.getElementById(`tab-esq-${i}`);
+						celulaPreenchida.classList.remove('vazia');
+						celulaPreenchida.classList.remove('sobreposto');
+						celulaPreenchida.className += ' preenchida';
+						embarcacao.className += ' transparente'
+					}
+				} else {
+					let celulaID = e.target.id;
+					let celulaArrayID = celulaID.split('-');
+					removerSobreposto(parseInt(celulaArrayID[2]), celulaArrayID[1], navioTanque);
+					embarcacao.classList.remove('transparente');
 				}
-				embarcacao.className += ' transparente'
 			}
 			break;
 
@@ -344,13 +389,22 @@ function dragDrop(e) {
 				this.classList.remove('celula-invalida');
 				embarcacao.classList.remove('transparente');
 			} else {
-				let i = arrID[2];
-				valor = i === undefined ? 0 : parseInt(arrID[2]);
-				for (i = valor; i < valor +  10 * navioTanque; i = i + 10) {
-					celulaPreenchida = document.getElementById(`tab-dir-${i}`);
-					celulaPreenchida.className += ' preenchida';
+				if (podePosicionar(e.target, navioTanque)) {
+					let i = arrID[2];
+					valor = i === undefined ? 0 : parseInt(arrID[2]);
+					for (i = valor; i < valor +  10 * navioTanque; i = i + 10) {
+						celulaPreenchida = document.getElementById(`tab-dir-${i}`);
+						celulaPreenchida.classList.remove('vazia');
+						celulaPreenchida.classList.remove('sobreposto');
+						celulaPreenchida.className += ' preenchida';
+						embarcacao.className += ' transparente'
+					}
+				} else {
+					let celulaID = e.target.id;
+					let celulaArrayID = celulaID.split('-');
+					removerSobreposto(parseInt(celulaArrayID[2]), celulaArrayID[1], navioTanque);
+					embarcacao.classList.remove('transparente');
 				}
-				embarcacao.className += ' transparente'
 			}
 			break;
 
@@ -362,13 +416,22 @@ function dragDrop(e) {
 				this.classList.remove('celula-invalida');
 				embarcacao.classList.remove('transparente');
 			} else {
-				let i = arrID[2];
-				valor = i === undefined ? 0 : parseInt(arrID[2]);
-				for (i = valor; i < valor +  10 * portaAvioes; i = i + 10) {
-					celulaPreenchida = document.getElementById(`tab-esq-${i}`);
-					celulaPreenchida.className += ' preenchida';
+				if (podePosicionar(e.target, portaAvioes)) {
+					let i = arrID[2];
+					valor = i === undefined ? 0 : parseInt(arrID[2]);
+					for (i = valor; i < valor +  10 * portaAvioes; i = i + 10) {
+						celulaPreenchida = document.getElementById(`tab-esq-${i}`);
+						celulaPreenchida.classList.remove('vazia');
+						celulaPreenchida.classList.remove('sobreposto');
+						celulaPreenchida.className += ' preenchida';
+						embarcacao.className += ' transparente'
+					}
+				} else {
+					let celulaID = e.target.id;
+					let celulaArrayID = celulaID.split('-');
+					removerSobreposto(parseInt(celulaArrayID[2]), celulaArrayID[1], portaAvioes);
+					embarcacao.classList.remove('transparente');
 				}
-				embarcacao.className += ' transparente'
 			}
 			break;
 
@@ -380,13 +443,22 @@ function dragDrop(e) {
 				this.classList.remove('celula-invalida');
 				embarcacao.classList.remove('transparente');
 			} else {
-				let i = arrID[2];
-				valor = i === undefined ? 0 : parseInt(arrID[2]);
-				for (i = valor; i < valor +  10 * portaAvioes; i = i + 10) {
-					celulaPreenchida = document.getElementById(`tab-dir-${i}`);
-					celulaPreenchida.className += ' preenchida';
+				if (podePosicionar(e.target, portaAvioes)) {
+					let i = arrID[2];
+					valor = i === undefined ? 0 : parseInt(arrID[2]);
+					for (i = valor; i < valor +  10 * portaAvioes; i = i + 10) {
+						celulaPreenchida = document.getElementById(`tab-dir-${i}`);
+						celulaPreenchida.classList.remove('vazia');
+						celulaPreenchida.classList.remove('sobreposto');
+						celulaPreenchida.className += ' preenchida';
+						embarcacao.className += ' transparente';
+					}
+				} else {
+					let celulaID = e.target.id;
+					let celulaArrayID = celulaID.split('-');
+					removerSobreposto(parseInt(celulaArrayID[2]), celulaArrayID[1], portaAvioes);
+					embarcacao.classList.remove('transparente');
 				}
-				embarcacao.className += ' transparente'
 			}
 			break;
 
@@ -398,13 +470,22 @@ function dragDrop(e) {
 				this.classList.remove('celula-invalida');
 				embarcacao.classList.remove('transparente');
 			} else {
-				let i = arrID[2];
-				valor = i === undefined ? 0 : parseInt(arrID[2]);
-				for (i = valor; i < valor +  10 * contraTorpedeiro; i = i + 10) {
-					celulaPreenchida = document.getElementById(`tab-esq-${i}`);
-					celulaPreenchida.className += ' preenchida';
+				if (podePosicionar(e.target, contraTorpedeiro)) {
+					let i = arrID[2];
+					valor = i === undefined ? 0 : parseInt(arrID[2]);
+					for (i = valor; i < valor +  10 * contraTorpedeiro; i = i + 10) {
+						celulaPreenchida = document.getElementById(`tab-esq-${i}`);
+						celulaPreenchida.classList.remove('sobreposto');
+						celulaPreenchida.classList.remove('vazia');
+						celulaPreenchida.className += ' preenchida';
+						embarcacao.className += ' transparente';
+					}
+				} else {
+					let celulaID = e.target.id;
+					let celulaArrayID = celulaID.split('-');
+					removerSobreposto(parseInt(celulaArrayID[2]), celulaArrayID[1], contraTorpedeiro);
+					embarcacao.classList.remove('transparente');
 				}
-				embarcacao.className += ' transparente'
 			}
 			break;
 
@@ -416,13 +497,22 @@ function dragDrop(e) {
 				this.classList.remove('celula-invalida');
 				embarcacao.classList.remove('transparente');
 			} else {
-				let i = arrID[2];
-				valor = i === undefined ? 0 : parseInt(arrID[2]);
-				for (i = valor; i < valor +  10 * contraTorpedeiro; i = i + 10) {
-					celulaPreenchida = document.getElementById(`tab-esq-${i}`);
-					celulaPreenchida.className += ' preenchida';
+				if (podePosicionar(e.target, contraTorpedeiro)) {
+					let i = arrID[2];
+					valor = i === undefined ? 0 : parseInt(arrID[2]);
+					for (i = valor; i < valor +  10 * contraTorpedeiro; i = i + 10) {
+						celulaPreenchida = document.getElementById(`tab-esq-${i}`);
+						celulaPreenchida.classList.remove('sobreposto');
+						celulaPreenchida.classList.remove('vazia');
+						celulaPreenchida.className += ' preenchida';
+						embarcacao.className += ' transparente';
+					}
+				} else {
+					let celulaID = e.target.id;
+					let celulaArrayID = celulaID.split('-');
+					removerSobreposto(parseInt(celulaArrayID[2]), celulaArrayID[1], contraTorpedeiro);
+					embarcacao.classList.remove('transparente');
 				}
-				embarcacao.className += ' transparente'
 			}
 			break;
 
@@ -434,13 +524,22 @@ function dragDrop(e) {
 				this.classList.remove('celula-invalida');
 				embarcacao.classList.remove('transparente');
 			} else {
-				let i = arrID[2];
-				valor = i === undefined ? 0 : parseInt(arrID[2]);
-				for (i = valor; i < valor +  10 * contraTorpedeiro; i = i + 10) {
-					celulaPreenchida = document.getElementById(`tab-dir-${i}`);
-					celulaPreenchida.className += ' preenchida';
+				if (podePosicionar(e.target, contraTorpedeiro)) {
+					let i = arrID[2];
+					valor = i === undefined ? 0 : parseInt(arrID[2]);
+					for (i = valor; i < valor +  10 * contraTorpedeiro; i = i + 10) {
+						celulaPreenchida = document.getElementById(`tab-dir-${i}`);
+						celulaPreenchida.classList.remove('sobreposto');
+						celulaPreenchida.classList.remove('vazia');
+						celulaPreenchida.className += ' preenchida';
+						embarcacao.className += ' transparente';
+					}
+				} else {
+					let celulaID = e.target.id;
+					let celulaArrayID = celulaID.split('-');
+					removerSobreposto(parseInt(celulaArrayID[2]), celulaArrayID[1], contraTorpedeiro);
+					embarcacao.classList.remove('transparente');
 				}
-				embarcacao.className += ' transparente'
 			}
 			break;
 
@@ -452,13 +551,22 @@ function dragDrop(e) {
 				this.classList.remove('celula-invalida');
 				embarcacao.classList.remove('transparente');
 			} else {
-				let i = arrID[2];
-				valor = i === undefined ? 0 : parseInt(arrID[2]);
-				for (i = valor; i < valor +  10 * contraTorpedeiro; i = i + 10) {
-					celulaPreenchida = document.getElementById(`tab-dir-${i}`);
-					celulaPreenchida.className += ' preenchida';
+				if (podePosicionar(e.target, contraTorpedeiro)) {
+					let i = arrID[2];
+					valor = i === undefined ? 0 : parseInt(arrID[2]);
+					for (i = valor; i < valor +  10 * contraTorpedeiro; i = i + 10) {
+						celulaPreenchida = document.getElementById(`tab-dir-${i}`);
+						celulaPreenchida.classList.remove('sobreposto');
+						celulaPreenchida.classList.remove('vazia');
+						celulaPreenchida.className += ' preenchida';
+					}
+					embarcacao.className += ' transparente'
+				} else {
+					let celulaID = e.target.id;
+					let celulaArrayID = celulaID.split('-');
+					removerSobreposto(parseInt(celulaArrayID[2]), celulaArrayID[1], contraTorpedeiro);
+					embarcacao.classList.remove('transparente');
 				}
-				embarcacao.className += ' transparente'
 			}
 			break;
 
@@ -470,13 +578,22 @@ function dragDrop(e) {
 				this.classList.remove('celula-invalida');
 				embarcacao.classList.remove('transparente');
 			} else {
-				let i = arrID[2];
-				valor = i === undefined ? 0 : parseInt(arrID[2]);
-				for (i = valor; i < valor +  10 * submarino; i = i + 10) {
-					celulaPreenchida = document.getElementById(`tab-esq-${i}`);
-					celulaPreenchida.className += ' preenchida';
+				if (podePosicionar(e.target, submarino)) {
+					let i = arrID[2];
+					valor = i === undefined ? 0 : parseInt(arrID[2]);
+					for (i = valor; i < valor +  10 * submarino; i = i + 10) {
+						celulaPreenchida = document.getElementById(`tab-esq-${i}`);
+						celulaPreenchida.classList.remove('sobreposto');
+						celulaPreenchida.classList.remove('vazia');
+						celulaPreenchida.className += ' preenchida';
+					}
+					embarcacao.className += ' transparente'
+				} else {
+					let celulaID = e.target.id;
+					let celulaArrayID = celulaID.split('-');
+					removerSobreposto(parseInt(celulaArrayID[2]), celulaArrayID[1], submarino);
+					embarcacao.classList.remove('transparente');
 				}
-				embarcacao.className += ' transparente'
 			}
 			break;
 
@@ -488,19 +605,175 @@ function dragDrop(e) {
 				this.classList.remove('celula-invalida');
 				embarcacao.classList.remove('transparente');
 			} else {
-				let i = arrID[2];
-				valor = i === undefined ? 0 : parseInt(arrID[2]);
-				for (i = valor; i < valor +  10 * submarino; i = i + 10) {
-					celulaPreenchida = document.getElementById(`tab-dir-${i}`);
-					celulaPreenchida.className += ' preenchida';
+				if (podePosicionar(e.target, submarino)) {
+					let i = arrID[2];
+					valor = i === undefined ? 0 : parseInt(arrID[2]);
+					for (i = valor; i < valor +  10 * submarino; i = i + 10) {
+						celulaPreenchida = document.getElementById(`tab-dir-${i}`);
+						celulaPreenchida.classList.remove('sobreposto');
+						celulaPreenchida.classList.remove('vazia');
+						celulaPreenchida.className += ' preenchida';
+					}
+					embarcacao.className += ' transparente'
+				} else {
+					let celulaID = e.target.id;
+					let celulaArrayID = celulaID.split('-');
+					removerSobreposto(parseInt(celulaArrayID[2]), celulaArrayID[1], submarino);
+					embarcacao.classList.remove('transparente');
 				}
-				embarcacao.className += ' transparente'
 			}
 			break;
 			
 		default:
 			break;
 	}
+	if (embarcacoesEsqPosicionadas()) {
+		frotaEsquerda.style.display = 'none';
+	}
+	if (embarcacoesDirPosicionadas()) {
+		frotaDireita.style.display = 'none';
+	}
 }
 //#endregion
 
+function marcarSobreposto(celulaInicial, tamanhoEmbarcacao) {
+	let celula;
+	for (i = celulaInicial; i < celulaInicial + tamanhoEmbarcacao * 10; i += 10) {
+		celula = document.getElementById(`tab-${arrID[1]}-${i}`);
+		celula.className += ' sobreposto'
+	}
+}
+
+function removerSobreposto(celulaInicial, tabuleiro, tamanhoEmbarcacao) {
+	let celula;
+	for (i = celulaInicial; i < celulaInicial + tamanhoEmbarcacao * 10; i += 10) {
+		if (i > 99) {
+			break;
+		}
+		celula = document.getElementById(`tab-${tabuleiro}-${i}`);
+		celula.classList.remove('sobreposto');
+	}
+}
+
+function embarcacoesEsqPosicionadas() {
+	return document.querySelectorAll('#tabuleiro .preenchida').length === 17 ? true : false;
+}
+
+function embarcacoesDirPosicionadas() {
+	return document.querySelectorAll('#tabuleiro2 .preenchida').length === 17 ? true : false;
+}
+
+function podePosicionar(celulaInicial, tamanhoEmbarcacao) {
+	let celulaInicialID = celulaInicial.id;
+	let celulaInicialArrayID = celulaInicialID.split('-');
+	for (i = parseInt(celulaInicialArrayID[2]); i < parseInt(celulaInicialArrayID[2]) + tamanhoEmbarcacao * 10; i += 10) {
+		let celula = document.getElementById(`${celulaInicialArrayID[0]}-${celulaInicialArrayID[1]}-${i}`);
+		if (celula.classList.contains('preenchida')) {
+			return false;
+		}
+	}
+	return true;
+}
+
+function esconderEmbarcacoes(direita, botao) {
+	if (!direita) {
+		if (embarcacoesEsqPosicionadas()) {
+			let celulas = tabuleiro.getElementsByClassName('preenchida');
+			for (const celula of celulas) {
+				celula.style.backgroundColor = '#0077be';
+			}
+			jogadorEsquerdaPronto = true;
+			botao.disabled = true;
+		} else {
+			alert('É necessário posicionar todas as embarcações da esquerda');
+		}
+	} else {
+		if (embarcacoesDirPosicionadas()) {
+			let celulas = tabuleiro2.getElementsByClassName('preenchida');
+			for (const celula of celulas) {
+				celula.style.backgroundColor = '#0077be';
+			}
+			jogadorDireitaPronto = true;
+			botao.disabled = true;
+		} else {
+			alert('É necessário posicionar todas as embarcações da direita');
+		}
+	}
+	if (jogadorEsquerdaPronto && jogadorDireitaPronto) {
+		let botao = document.getElementById('botao-iniciar-jogo');
+		botao.disabled = false;
+	}
+}
+
+function iniciarJogo() {
+	jogoIniciado = true;
+	turnoJogadorEsquerda = true;
+	textoAjuda.textContent = 'Jogador da esquerda pode disparar um torpedo!';
+}
+
+function dispararTorpedo(e) {
+	if (!jogoIniciado) {
+		console.log(e);
+		alert('Jogo ainda não foi iniciado!');
+	} else {
+		if (turnoJogadorEsquerda) {
+			let celulaAtingida = e.target;
+			let celulaAtingidaArrID = celulaAtingida.id.split('-');
+			if (celulaAtingidaArrID[1] == 'esq') {
+				alert('Disparo inválido. Dispare novamente');
+			}
+			else if (celulaAtingida.classList.contains('atingiu-agua') || celulaAtingida.classList.contains('atingiu-embarcacao')) {
+				alert('Torpedo já foi disparado nesta célula. Dispare novamente');
+			}
+			else if (celulaAtingida.classList.contains('vazia')) {
+				celulaAtingida.className += ' atingiu-agua';
+				turnoJogadorEsquerda = false;
+				turnoJogadorDireita = true;
+				textoAjuda.textContent = 'Turno do jogador da direita';
+			} else {
+				celulaAtingida.className += ' atingiu-embarcacao';
+				turnoJogadorEsquerda = true;
+				turnoJogadorDireita = false;
+				acertosJogadorEsquerda += 1;
+				if (acertosJogadorEsquerda === 17) {
+					let reiniciar = confirm('Jogador da esquerda venceu. Jogar novamente?');
+					if (reiniciar) {
+						window.location.reload();
+					} else {
+						window.close();
+					}
+				}
+				textoAjuda.textContent = 'Jogador da esquerda pode disparar novamente';
+			}
+		} else {
+			let celulaAtingida = e.target;
+			let celulaAtingidaArrID = celulaAtingida.id.split('-');
+			if (celulaAtingidaArrID[1] == 'dir') {
+				alert('Disparo inválido. Dispare novamente');
+			}
+			else if (celulaAtingida.classList.contains('atingiu-agua') || celulaAtingida.classList.contains('atingiu-embarcacao')) {
+				alert('Torpedo já foi disparado nesta célula. Dispare novamente');
+			}
+			else if (celulaAtingida.classList.contains('vazia')) {
+				celulaAtingida.className += ' atingiu-agua';
+				turnoJogadorEsquerda = true;
+				turnoJogadorDireita = false;
+				textoAjuda.textContent = 'Turno do jogador da esquerda';
+			} else {
+				celulaAtingida.className += ' atingiu-embarcacao';
+				turnoJogadorEsquerda = false;
+				turnoJogadorDireita = true;
+				acertosJogadorDireita += 1;
+				if (acertosJogadorDireita === 17) {
+					let reiniciar = confirm('Jogador da direita venceu. Jogar novamente?');
+					if (reiniciar) {
+						window.location.reload();
+					} else {
+						window.close();
+					}
+				}
+				textoAjuda.textContent = 'Jogador da direita pode disparar novamente';
+			}
+		}
+	}
+}
