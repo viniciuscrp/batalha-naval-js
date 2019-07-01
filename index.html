@@ -8,7 +8,11 @@
     <title>Batalha naval</title>
 </head>
 <body>
-    <div class="divisor"></div>
+    <div style="width: 100%; display: flex; justify-content: space-around">
+        <button class="btn" onclick="esconderEmbarcacoes(false, this)">Esconder embarcações</button>
+        <button class="btn" id="botao-iniciar-jogo" onclick="iniciarJogo()" disabled>Iniciar jogo</button>
+        <button class="btn" onclick="esconderEmbarcacoes(true, this)">Esconder embarcações</button>
+    </div>
     <div id="tabuleiro"></div>
     <div id="tabuleiro2"></div>
     <div id="frota-esquerda" class="navios esq">
@@ -18,13 +22,14 @@
         <div id="contraTorpedeiroEsq2" class="contratorpedeiro esq" draggable="true"></div>
         <div id="submarinoEsq" class="submarino esq" draggable="true"></div>
     </div>
-    <div id="frota-dir" class="navios dir">
+    <div id="frota-direita" class="navios dir">
         <div id="submarinoDir" class="submarino dir" draggable="true"></div>
         <div id="contraTorpedeiroDir1" class="contratorpedeiro dir" draggable="true"></div>
         <div id="contraTorpedeiroDir2" class="contratorpedeiro dir" draggable="true"></div>
         <div id="portaAvioesDir" class="porta-avioes dir" draggable="true"></div>
         <div id="navioTanqueDir" class="navio-tanque dir" draggable="true"></div>
     </div>
+    <div id="texto-ajuda" class="mensagem">Posicionem e escondam as embarcações para iniciar o jogo</div>
     <script src="js/script.js"></script>
 </body>
 </html>
