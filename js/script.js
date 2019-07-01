@@ -334,6 +334,7 @@ function dragEnter(e) {
 
 function dragLeave(e) {
 	e.preventDefault();
+	if (embarcacao === undefined) return;
 	let celulaAnterior = e.srcElement;
 	if (celulaAnterior.classList.contains('celula-invalida')) {
 		celulaAnterior.classList.remove('celula-invalida');
@@ -720,7 +721,6 @@ function iniciarJogo() {
 
 function dispararTorpedo(e) {
 	if (!jogoIniciado) {
-		console.log(e);
 		alert('Jogo ainda não foi iniciado!');
 	} else {
 		if (turnoJogadorEsquerda) {
